@@ -1,0 +1,78 @@
+{
+  "onebot": {
+    "wsUrl": "ws://127.0.0.1:3001",
+    "httpUrl": "http://127.0.0.1:3000",
+    "accessToken": "",
+    "selfId": ""
+  },
+  "dsh": {
+    "baseUrl": "http://127.0.0.1:43189",
+    "profile": "desktop",
+    "model": "",
+    "provider": "",
+    "lockModel": false,
+    "autoMintCookie": true,
+    "cookie": "",
+    "workspaceGroup": "QQ 聊天"
+  },
+  "access": {
+    "admins": [],
+    "allowUsers": [],
+    "allowGroups": [],
+    "requireMention": true,
+    "triggerNames": ["鲸鱼娘", "鲸鲸"]
+  },
+  "memory": {
+    "dbPath": "data/memory/sea.sqlite",
+    "injectCharLimit": 600,
+    "recallLimit": 6,
+    "pruneThreshold": 0.05,
+    "categories": {
+      "identity": { "baseLambda": 0.012, "defaultImportance": 0.9 },
+      "fact": { "baseLambda": 0.018, "defaultImportance": 0.7 },
+      "event": { "baseLambda": 0.035, "defaultImportance": 0.55 },
+      "assumption": { "baseLambda": 0.045, "defaultImportance": 0.4 },
+      "chat_noise": { "baseLambda": 0.08, "defaultImportance": 0.25 }
+    }
+  },
+  "bridge": {
+    "textChunkLimit": 400,
+    "consoleToken": "",
+    "consolePort": 3120
+  },
+  "persona": {
+    "id": "whale",
+    "contentDir": "packages/persona/content/whale"
+  },
+  "social": {
+    "enabled": true,
+    "stickerDir": "data/stickers",
+    "idleOpenMs": 600000,
+    "diveAfterProbeMs": 300000,
+    "tickMs": 30000,
+    "proactivePrompt": "【系统】群里安静一会儿了。请用一两句自然、轻松的话主动开个小话题（不要说自己是系统提示）。需要时可附带一个 [[sticker:id]]。",
+    "proactivePromptPool": [
+      "【系统】群里安静一会儿了。请用一两句自然、轻松的话主动开个小话题（不要说自己是系统提示）。需要时可附带一个 [[sticker:id]]。",
+      "【系统】冷场了。用一句随意的问候或小问题把话题捡起来，语气轻松，别太长。可用 [[sticker:id]]。",
+      "【系统】好久没人说话。像群友一样冒一句近况或分享欲，不要像播报。可用 [[sticker:id]]。"
+    ],
+    "multiBubble": true,
+    "bubbleGapMinMs": 800,
+    "bubbleGapMaxMs": 2000,
+    "typingDelay": true,
+    "typingMsPerChar": 30,
+    "typingMinMs": 400,
+    "typingMaxMs": 2500,
+    "pokeEnabled": true,
+    "pokeReply": "诶，戳我干嘛～有事直接说。",
+    "stickerCollectEnabled": true,
+    "tts": {
+      "enabled": false,
+      "httpUrl": "http://127.0.0.1:8787/tts",
+      "voice": "zh-CN-XiaoxiaoNeural",
+      "replyMode": "ask"
+    },
+    "personaCardsEnabled": true,
+    "wakeContextEnabled": true
+  }
+}

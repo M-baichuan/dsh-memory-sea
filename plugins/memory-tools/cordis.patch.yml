@@ -1,0 +1,3 @@
+- insert:
+    - id: memory-sea-tools
+      name: "@dsh-memory-sea/memory-tools"

@@ -1,0 +1,25 @@
+{
+  "name": "@dsh-memory-sea/whale-preset",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "files": ["dist", "cordis.patch.yml"],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "engines": {
+    "dsh": ">=0.2.0 <0.4.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@dsh-memory-sea/persona": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
+}
