@@ -1,0 +1,10 @@
+# Example OneBot v11 side for SnowLuma / NapCat-compatible setups.
+# Adjust to your protocol client's real config schema.
+
+host: 127.0.0.1
+http:
+  port: 3000
+websocket:
+  port: 3001
+accessToken: "change-me"
+# Enable reverse/forward WS so packages/bridge can connect to ws://127.0.0.1:3001

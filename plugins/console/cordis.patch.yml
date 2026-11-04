@@ -1,0 +1,3 @@
+- insert:
+    - id: memory-sea-console
+      name: "@dsh-memory-sea/console"

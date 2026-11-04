@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Memory Sea Console</title>
+    <style>
+      :root {
+        --bg: #0b1c24;
+        --panel: #122833;
+        --text: #e7f2f6;
+        --accent: #3db8a6;
+        --pin: #f0c674;
+        --private: #7aa2f7;
+        --group: #9ece6a;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "PingFang SC", sans-serif;
+        background: radial-gradient(circle at top, #163746, var(--bg));
+        color: var(--text);
+        min-height: 100vh;
+      }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1.5rem 1.25rem 3rem;
+      }
+      h1 {
+        margin: 0 0 0.25rem;
+        font-weight: 620;
+      }
+      p.lead {
+        color: #a9c3cd;
+        margin-top: 0;
+      }
+      .grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1fr;
+      }
+      @media (min-width: 900px) {
+        .grid {
+          grid-template-columns: 340px 1fr;
+        }
+      }
+      section {
+        background: color-mix(in srgb, var(--panel) 92%, black);
+        border: 1px solid #1f3d4a;
+        border-radius: 14px;
+        padding: 1rem 1.1rem;
+      }
+      label {
+        display: block;
+        font-size: 0.85rem;
+        color: #9eb8c3;
+        margin: 0.55rem 0 0.35rem;
+      }
+      input,
+      select,
+      button,
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+        border-radius: 10px;
+        border: 1px solid #2a4d5c;
+        background: #0e212b;
+        color: var(--text);
+        padding: 0.65rem 0.75rem;
+        font: inherit;
+      }
+      button {
+        background: linear-gradient(180deg, #3db8a6, #2e9a8b);
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        margin-top: 0.55rem;
+      }
+      button.secondary {
+        background: #1a3542;
+        border: 1px solid #2a4d5c;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        background: #0a1820;
+        border-radius: 10px;
+        padding: 0.75rem;
+        min-height: 6rem;
+        font-size: 0.82rem;
+        max-height: 280px;
+        overflow: auto;
+      }
+      canvas {
+        width: 100%;
+        height: 360px;
+        background: #07141b;
+        border-radius: 12px;
+        border: 1px solid #1f3d4a;
+        display: block;
+      }
+      .legend {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        font-size: 0.8rem;
+        color: #9eb8c3;
+        margin-top: 0.5rem;
+      }
+      .dot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Memory Sea</h1>
+      <p class="lead">记忆海控制台 · 召回 / 钉住 / 场合隔离 / 星海图</p>
+      <div class="grid">
+        <section>
+          <label for="token">Console Token</label>
+          <input id="token" type="password" placeholder="config.bridge.consoleToken" />
+          <label for="query">召回查询</label>
+          <input id="query" placeholder="关键词" />
+          <label for="scope">Scope Key</label>
+          <input id="scope" value="user:demo" />
+          <label for="channel">Channel</label>
+          <select id="channel">
+            <option value="private">private（私聊）</option>
+            <option value="group">group（群聊）</option>
+          </select>
+          <label for="groupId">Group Id（群聊场合）</label>
+          <input id="groupId" placeholder="可选" />
+          <button id="btn-recall">Recall</button>
+          <button id="btn-pending" class="secondary">Pending</button>
+          <button id="btn-graph" class="secondary">刷新星海</button>
+          <button id="btn-maint" class="secondary">Run Maintenance</button>
+          <label for="memId">Memory Id（钉住/改可见性）</label>
+          <input id="memId" placeholder="uuid" />
+          <button id="btn-pin" class="secondary">Pin</button>
+          <button id="btn-unpin" class="secondary">Unpin</button>
+          <label for="vis">Visibility</label>
+          <select id="vis">
+            <option value="private">private</option>
+            <option value="group">group</option>
+            <option value="public">public</option>
+          </select>
+          <button id="btn-vis" class="secondary">Set Visibility</button>
+        </section>
+        <section>
+          <label>星海图</label>
+          <canvas id="sea" width="720" height="360"></canvas>
+          <div class="legend">
+            <span><i class="dot" style="background: var(--pin)"></i>pin</span>
+            <span><i class="dot" style="background: var(--private)"></i>private</span>
+            <span><i class="dot" style="background: var(--group)"></i>group</span>
+            <span><i class="dot" style="background: var(--accent)"></i>public</span>
+          </div>
+          <label>结果</label>
+          <pre id="out">等待操作…</pre>
+        </section>
+      </div>
+    </main>
+    <script>
+      const out = document.getElementById("out");
+      const canvas = document.getElementById("sea");
+      const ctx = canvas.getContext("2d");
+      const headers = () => ({
+        "content-type": "application/json",
+        "x-console-token": document.getElementById("token").value || "",
+      });
+
+      async function call(url, body) {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: headers(),
+          body: JSON.stringify(body || {}),
+        });
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+          out.textContent = JSON.stringify(data, null, 2);
+        } catch {
+          out.textContent = text;
+          return null;
+        }
+        return data;
+      }
+
+      function drawGraph(nodes) {
+        const w = canvas.width;
+        const h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = "#07141b";
+        ctx.fillRect(0, 0, w, h);
+        if (!nodes || !nodes.length) {
+          ctx.fillStyle = "#6f8b97";
+          ctx.fillText("暂无活跃记忆", 24, 32);
+          return;
+        }
+        const cx = w / 2;
+        const cy = h / 2;
+        const n = nodes.length;
+        nodes.forEach((node, i) => {
+          const angle = (i / n) * Math.PI * 2;
+          const radius = 70 + (node.importance || 0.5) * 90 + (i % 5) * 8;
+          const x = cx + Math.cos(angle) * radius;
+          const y = cy + Math.sin(angle) * radius * 0.72;
+          let color = "#3db8a6";
+          if (node.pin) color = "#f0c674";
+          else if (node.visibility === "private") color = "#7aa2f7";
+          else if (node.visibility === "group") color = "#9ece6a";
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(x, y);
+          ctx.strokeStyle = "rgba(61,184,166,0.18)";
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(x, y, node.pin ? 7 : 4 + (node.importance || 0.4) * 4, 0, Math.PI * 2);
+          ctx.fillStyle = color;
+          ctx.fill();
+        });
+        ctx.beginPath();
+        ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+        ctx.fillStyle = "#dff6f1";
+        ctx.fill();
+      }
+
+      document.getElementById("btn-recall").onclick = () =>
+        call("/api/recall", {
+          scopeKey: document.getElementById("scope").value,
+          query: document.getElementById("query").value,
+          channel: document.getElementById("channel").value,
+          groupId: document.getElementById("groupId").value || undefined,
+        });
+      document.getElementById("btn-pending").onclick = () => call("/api/pending", {});
+      document.getElementById("btn-maint").onclick = () => call("/api/maintenance", {});
+      document.getElementById("btn-graph").onclick = async () => {
+        const data = await call("/api/graph", { limit: 80 });
+        if (data?.nodes) drawGraph(data.nodes);
+      };
+      document.getElementById("btn-pin").onclick = () =>
+        call("/api/pin", { id: document.getElementById("memId").value, pin: true });
+      document.getElementById("btn-unpin").onclick = () =>
+        call("/api/pin", { id: document.getElementById("memId").value, pin: false });
+      document.getElementById("btn-vis").onclick = () =>
+        call("/api/visibility", {
+          id: document.getElementById("memId").value,
+          visibility: document.getElementById("vis").value,
+        });
+
+      call("/api/graph", { limit: 80 }).then((data) => {
+        if (data?.nodes) drawGraph(data.nodes);
+      });
+    </script>
+  </body>
+</html>

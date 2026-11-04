@@ -1,0 +1,27 @@
+{
+  "name": "@dsh-memory-sea/console",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/host/index.js",
+  "files": ["dist", "public", "cordis.patch.yml"],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "bin": {
+    "dsh-memory-sea-console": "./dist/host/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node ./dist/host/index.js",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@dsh-memory-sea/memory-sea": "workspace:*",
+    "@dsh-memory-sea/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
+}

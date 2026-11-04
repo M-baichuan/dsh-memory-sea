@@ -1,0 +1,85 @@
+记忆海 · 本机眼睛（eye）
+========================
+
+她调的是「你电脑上的摄像头」，不是 QQ 官方摄像头权限。
+权限给的是本机 eye 进程（仅监听 127.0.0.1）。
+
+首次
+----
+  pnpm eye:setup
+  （安装 opencv-python-headless）
+
+每次使用前
+----------
+  1) 开 DSH 桌面端 + NapCat + bridge（和平时一样）
+  2) 另开一个终端：pnpm eye
+  3) 仅主人 QQ 私聊，且必须带口令，例如：
+       看看外面 你的口令
+       你现在能看看外边不 你的口令
+       看看外面 口令：你的口令
+     （主人 QQ 写死在 packages/bridge/src/social/eye.ts 的 EYE_OWNER_QQ；
+       口令在 config social.eye.secret 或环境变量 EYE_SECRET）
+     须先重启 bridge，并另开终端跑着 pnpm eye
+
+她会：
+  · 让 eye 抓一帧 JPEG
+  · 送进 DSH 视觉，用人设口吻描述
+  · 用同一口令 AES 加密锁进本地保险柜（data/state/eye-vault/）
+  · 写一条很轻的 chat_noise（以后闲聊可淡淡接上）
+
+保险柜（仅大号 + 口令）
+----------------------
+  眼睛相册 口令
+  再看一眼 1 口令          （只走私聊发原图，不进群）
+  删除眼睛 1 口令
+  清空眼睛相册 口令
+
+  · 密文无法用记事本直接打开；口令错打不开
+  · 改口令后旧柜打不开（等于废了），请先清空再改
+  · 默认最多 30 张，超出删最旧
+
+DSH 会话里的图
+--------------
+  眼睛抓帧会进 DSH 会话日志（不是 QQ）。
+  从现在起眼睛单独用「眼睛 · QQ」会话，不再写进普通私聊记录。
+
+  若旧私聊里还留着图，可先完全退出 DSH 桌面端，再运行：
+    python scripts/eye/scrub-session-images.py "<该会话目录>/session.v4.jsonl.zstd"
+  会备份 .bak，并把 image 块替换成「已删除的眼睛截图」。
+  然后重启 DSH / bridge。
+
+配置（config.json → social）
+----------------------------
+  "skills": { "eye": true },
+  "eye": {
+    "enabled": true,
+    "httpUrl": "http://127.0.0.1:8790/snapshot",
+    "timeoutMs": 12000,
+    "secret": "你的口令",
+    "allowGroup": false
+  }
+
+权限
+----
+  · 硬编码：只有 EYE_OWNER_QQ（见 eye.ts）能调用
+  · 还必须带对口令，否则当闲聊（不弹「口令不对」）
+  · 其他任何号（含其它管理员）一律拒绝
+  · 日志只打 secret=ok/missing，不打印口令明文
+
+换摄像头
+--------
+  环境变量 EYE_CAMERA=1 再启动 pnpm eye
+  或浏览器打开 http://127.0.0.1:8790/health 探活
+
+隐私
+----
+  · 默认仅管理员、默认禁止群里开摄像头
+  · eye 只绑 127.0.0.1，不要改成 0.0.0.0
+  · 不用时关掉 pnpm eye，或盖上镜头
+
+排查
+----
+  「眼睛这会儿睁不开」
+    → eye 没开 / 摄像头被占用 / Windows 隐私里关掉了桌面应用摄像头
+  画面全黑
+    → 换 EYE_CAMERA，或拿掉镜头盖；服务会预热几帧
