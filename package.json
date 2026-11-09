@@ -1,0 +1,33 @@
+{
+  "name": "dsh-memory-sea",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DeepSeek Harness + OneBot QQ bridge with Ebbinghaus long-term memory (Memory Sea)",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "test:memory": "pnpm --filter @dsh-memory-sea/memory-sea test",
+    "bridge": "node ./scripts/discover-dsh-port-exact.mjs && node ./packages/bridge/dist/index.js",
+    "discover:port": "node ./scripts/discover-dsh-port-exact.mjs",
+    "console": "pnpm --filter @dsh-memory-sea/console start",
+    "maintenance": "node ./packages/memory-sea/dist/cli-maintenance.js",
+    "smoke": "node scripts/smoke-bridge.mjs",
+    "setup:plugins": "node scripts/setup-dsh-plugins.mjs",
+    "discover:dsh": "node scripts/discover-dsh-desktop-port.mjs",
+    "pack:share": "node scripts/pack-share.mjs",
+    "tts": "node scripts/tts/server.mjs",
+    "tts:setup": "python -m pip install -r scripts/tts/requirements.txt",
+    "eye": "python scripts/eye/server.py",
+    "eye:setup": "python -m pip install -r scripts/eye/requirements.txt"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  }
+}

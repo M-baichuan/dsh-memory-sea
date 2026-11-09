@@ -1,0 +1,9 @@
+# Append to ~/.dsh/profiles/<name>/cordis.patch.yml after:
+#   dsh plugin --profile <name> add ./plugins/memory-tools
+#   dsh plugin --profile <name> add ./plugins/whale-preset
+
+- insert:
+    - id: memory-sea-tools
+      name: "@dsh-memory-sea/memory-tools"
+    - id: memory-sea-whale-preset
+      name: "@dsh-memory-sea/whale-preset"

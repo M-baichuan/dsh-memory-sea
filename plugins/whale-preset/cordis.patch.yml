@@ -1,0 +1,4 @@
+- insert:
+    - id: memory-sea-whale-preset
+      name: "@dsh-memory-sea/whale-preset"
+      inject: [agentPresets]

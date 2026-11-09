@@ -1,0 +1,29 @@
+{
+  "name": "@dsh-memory-sea/memory-sea",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "bin": {
+    "memory-sea-maintenance": "./dist/cli-maintenance.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "maintenance": "node ./dist/cli-maintenance.js"
+  },
+  "dependencies": {
+    "@dsh-memory-sea/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  }
+}

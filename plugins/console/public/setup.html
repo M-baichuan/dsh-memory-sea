@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>首次设置 · Memory Sea</title>
+  <style>
+    :root {
+      --bg: #0b1c24;
+      --panel: #122833;
+      --text: #e7f2f6;
+      --muted: #8aa4b0;
+      --accent: #3db8a6;
+      --danger: #e06c75;
+      --ok: #9ece6a;
+      --warn: #f0c674;
+      --border: #1e3a47;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top, #163746, var(--bg));
+      color: var(--text);
+    }
+    .shell {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 20px;
+      min-height: calc(100vh - 40px);
+    }
+    h1 {
+      grid-column: 1 / -1;
+      margin: 0 0 4px;
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .sub {
+      grid-column: 1 / -1;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+    .stepper {
+      background: color-mix(in srgb, var(--panel) 92%, black);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 12px;
+      align-self: start;
+    }
+    .step {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .step.active {
+      background: color-mix(in srgb, var(--accent) 14%, transparent);
+      color: var(--text);
+    }
+    .step .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 5px;
+      background: #3a5560;
+      flex-shrink: 0;
+    }
+    .step.ready .dot { background: var(--ok); }
+    .step.bad .dot { background: var(--danger); }
+    .step.active .dot { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent); }
+    .step .label { font-size: 0.92rem; line-height: 1.35; }
+    .panel {
+      background: color-mix(in srgb, var(--panel) 92%, black);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 22px 16px;
+      display: flex;
+      flex-direction: column;
+      min-height: 420px;
+    }
+    .panel h2 {
+      margin: 0 0 6px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .hint {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+    }
+    .field { margin-bottom: 14px; }
+    label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0d222c;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    input:focus {
+      outline: 1px solid var(--accent);
+      border-color: var(--accent);
+    }
+    .row { display: flex; gap: 10px; align-items: center; }
+    .row input { flex: 1; }
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      background: linear-gradient(180deg, #3db8a6, #2e9a8b);
+      color: #042018;
+      font-weight: 600;
+    }
+    button.ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-weight: 500;
+    }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .err {
+      color: var(--danger);
+      font-size: 0.82rem;
+      min-height: 1.2em;
+      margin-top: 4px;
+    }
+    .okline { color: var(--ok); font-size: 0.82rem; margin-top: 4px; }
+    .footer {
+      margin-top: auto;
+      padding-top: 16px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      border-top: 1px solid var(--border);
+    }
+    .token-bar {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .token-bar input { max-width: 280px; }
+    pre.log {
+      background: #0a181f;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      max-height: 220px;
+      overflow: auto;
+      font-size: 0.78rem;
+      white-space: pre-wrap;
+      color: #b7d0da;
+    }
+    .diff {
+      background: #0a181f;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.82rem;
+      max-height: 240px;
+      overflow: auto;
+    }
+    .diff .k { color: var(--accent); }
+    .status-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .status-pill.on { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 50%, var(--border)); }
+    @media (max-width: 720px) {
+      .shell { grid-template-columns: 1fr; }
+      .stepper { display: flex; overflow-x: auto; gap: 4px; }
+      .step { min-width: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <h1>Memory Sea · 首次设置</h1>
+    <p class="sub">填 4 项信息，完成 config 写入、插件安装、端口发现与连通自检。</p>
+    <div class="token-bar">
+      <label style="margin:0">console token</label>
+      <input id="token" type="password" placeholder="x-console-token" autocomplete="off" />
+      <span id="bridgePill" class="status-pill">bridge ?</span>
+    </div>
+
+    <nav class="stepper" id="stepper"></nav>
+
+    <section class="panel">
+      <div id="form"></div>
+      <div class="footer">
+        <button type="button" class="ghost" id="prevBtn">上一步</button>
+        <button type="button" id="nextBtn">下一步</button>
+        <button type="button" id="doneBtn" style="display:none">完成</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STEPS = [
+      { id: "qq", title: "你们的 QQ 号" },
+      { id: "gateway", title: "QQ 网关" },
+      { id: "dsh", title: "DSH 端口" },
+      { id: "workspace", title: "工作区文件夹" },
+      { id: "finish", title: "完成" },
+    ];
+
+    const state = {
+      step: 0,
+      ready: [false, false, false, false, false],
+      selfId: "",
+      ownerQq: "",
+      ownerTitle: "主人",
+      wsUrl: "ws://127.0.0.1:3001",
+      httpUrl: "http://127.0.0.1:3000",
+      accessToken: "",
+      accessTokenSet: false,
+      baseUrl: "",
+      workspaceRoot: "",
+      lastDiff: null,
+      lastBackup: null,
+      errors: {},
+    };
+
+    function token() {
+      return document.getElementById("token").value || "";
+    }
+
+    async function api(path, opts = {}) {
+      const res = await fetch(path, {
+        ...opts,
+        headers: {
+          "content-type": "application/json",
+          "x-console-token": token(),
+          ...(opts.headers || {}),
+        },
+      });
+      const ct = res.headers.get("content-type") || "";
+      if (ct.includes("application/json")) {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || res.statusText);
+        return data;
+      }
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || res.statusText);
+      return text;
+    }
+
+    function setErr(key, msg) {
+      state.errors[key] = msg || "";
+      const el = document.getElementById("err-" + key);
+      if (el) el.textContent = msg || "";
+    }
+
+    function renderStepper() {
+      const root = document.getElementById("stepper");
+      root.innerHTML = STEPS.map((s, i) => {
+        const cls = [
+          "step",
+          i === state.step ? "active" : "",
+          state.ready[i] ? "ready" : "",
+          state.errors["step" + i] ? "bad" : "",
+        ].filter(Boolean).join(" ");
+        return `<div class="${cls}" data-i="${i}"><i class="dot"></i><div class="label">${i + 1}. ${s.title}</div></div>`;
+      }).join("");
+      root.querySelectorAll(".step").forEach((el) => {
+        el.addEventListener("click", () => {
+          const i = Number(el.dataset.i);
+          if (i <= state.step || state.ready[i] || i === state.step + 1) {
+            state.step = i;
+            render();
+          }
+        });
+      });
+    }
+
+    function renderForm() {
+      const form = document.getElementById("form");
+      const i = state.step;
+      if (i === 0) {
+        form.innerHTML = `
+          <h2>你们的 QQ 号</h2>
+          <p class="hint">机器人 QQ、你的主人号，以及她怎么叫你。</p>
+          <div class="field">
+            <label>机器人 QQ 号 → onebot.selfId</label>
+            <input id="selfId" type="text" inputmode="numeric" value="${esc(state.selfId)}" />
+            <div class="err" id="err-selfId"></div>
+          </div>
+          <div class="field">
+            <label>你的 QQ 号 / 主人 → access.admins[0]</label>
+            <input id="ownerQq" type="text" inputmode="numeric" value="${esc(state.ownerQq)}" />
+            <div class="err" id="err-ownerQq"></div>
+          </div>
+          <div class="field">
+            <label>ta 怎么称呼你 → persona.ownerTitle</label>
+            <input id="ownerTitle" type="text" value="${esc(state.ownerTitle || "主人")}" />
+            <div class="err" id="err-ownerTitle"></div>
+          </div>`;
+        bind("selfId"); bind("ownerQq"); bind("ownerTitle");
+      } else if (i === 1) {
+        form.innerHTML = `
+          <h2>QQ 网关</h2>
+          <p class="hint">OneBot WebSocket / HTTP。accessToken 留空表示保持现有值。</p>
+          <div class="field">
+            <label>wsUrl</label>
+            <input id="wsUrl" type="text" value="${esc(state.wsUrl)}" />
+            <div class="err" id="err-wsUrl"></div>
+          </div>
+          <div class="field">
+            <label>httpUrl</label>
+            <input id="httpUrl" type="text" value="${esc(state.httpUrl)}" />
+            <div class="err" id="err-httpUrl"></div>
+          </div>
+          <div class="field">
+            <label>accessToken${state.accessTokenSet ? "（已配置，回显脱敏）" : ""}</label>
+            <input id="accessToken" type="password" value="${esc(state.accessToken)}" placeholder="留空 = 不变" autocomplete="off" />
+            <div class="err" id="err-accessToken"></div>
+          </div>
+          <button type="button" id="testConn">测试连接</button>
+          <div class="okline" id="connMsg"></div>`;
+        bind("wsUrl"); bind("httpUrl"); bind("accessToken");
+        document.getElementById("testConn").onclick = testGateway;
+      } else if (i === 2) {
+        form.innerHTML = `
+          <h2>DSH 端口</h2>
+          <p class="hint">自动发现 DeepSeek Harness Desktop 的 web RPC 端口，写入 dsh.baseUrl。</p>
+          <div class="field">
+            <label>dsh.baseUrl</label>
+            <div class="row">
+              <input id="baseUrl" type="text" value="${esc(state.baseUrl)}" />
+              <button type="button" class="ghost" id="rediscover">重新发现</button>
+            </div>
+            <div class="err" id="err-baseUrl"></div>
+          </div>
+          <pre class="log" id="bootLog">（发现日志会出现在这里）</pre>`;
+        bind("baseUrl");
+        document.getElementById("rediscover").onclick = () => bootstrap(["discover"]);
+      } else if (i === 3) {
+        form.innerHTML = `
+          <h2>工作区文件夹</h2>
+          <p class="hint">Agent 工作目录 → dsh.workspaceRoot。留空则用仓库内 data/agents。</p>
+          <div class="field">
+            <label>目录路径</label>
+            <div class="row">
+              <input id="workspaceRoot" type="text" value="${esc(state.workspaceRoot)}" placeholder="例如 D:\\Agents\\qq-whale" />
+              <button type="button" class="ghost" id="checkDir">检测可写</button>
+            </div>
+            <div class="err" id="err-workspaceRoot"></div>
+            <div class="okline" id="dirMsg"></div>
+          </div>`;
+        bind("workspaceRoot");
+        document.getElementById("checkDir").onclick = checkWorkspace;
+      } else {
+        const diffHtml = state.lastDiff
+          ? Object.entries(state.lastDiff).map(([k, v]) =>
+              `<div><span class="k">${esc(k)}</span>: ${esc(JSON.stringify(v.from))} → ${esc(JSON.stringify(v.to))}</div>`
+            ).join("") || "<div>（无变更）</div>"
+          : `<div>selfId=${esc(state.selfId)}</div>
+             <div>ownerQq=${esc(state.ownerQq)}</div>
+             <div>ownerTitle=${esc(state.ownerTitle)}</div>
+             <div>wsUrl=${esc(state.wsUrl)}</div>
+             <div>httpUrl=${esc(state.httpUrl)}</div>
+             <div>accessToken=${state.accessToken && state.accessToken !== "••••" ? "（将更新）" : "（保持）"}</div>
+             <div>baseUrl=${esc(state.baseUrl)}</div>
+             <div>workspaceRoot=${esc(state.workspaceRoot) || "（默认 data/agents）"}</div>`;
+        form.innerHTML = `
+          <h2>完成</h2>
+          <p class="hint">预览将写入的字段。点「写入并启用」会备份 config.json 后深合并落盘，再跑插件安装与端口发现。</p>
+          <div class="diff" id="diffBox">${diffHtml}</div>
+          <div style="margin-top:12px" class="row">
+            <button type="button" id="applyBtn">写入并启用</button>
+          </div>
+          <div class="err" id="err-apply"></div>
+          <div class="okline" id="applyMsg"></div>
+          <pre class="log" id="bootLog" style="margin-top:12px">${esc(state.bootLog || "")}</pre>`;
+        document.getElementById("applyBtn").onclick = applyAll;
+      }
+
+      document.getElementById("prevBtn").disabled = state.step === 0;
+      document.getElementById("nextBtn").style.display = state.step === 4 ? "none" : "";
+      document.getElementById("doneBtn").style.display = state.step === 4 ? "" : "none";
+    }
+
+    function esc(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function bind(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("input", () => {
+        state[id] = el.value;
+        setErr(id, "");
+      });
+    }
+
+    function render() {
+      renderStepper();
+      renderForm();
+    }
+
+    async function validateStep(i) {
+      if (i === 0) {
+        const data = await api("/api/setup/validate", {
+          method: "POST",
+          body: JSON.stringify({
+            fields: ["selfId", "ownerQq", "ownerTitle"],
+            selfId: state.selfId,
+            ownerQq: state.ownerQq,
+            ownerTitle: state.ownerTitle,
+          }),
+        });
+        for (const [k, v] of Object.entries(data.results || {})) setErr(k, v.ok ? "" : v.detail);
+        state.ready[0] = !!data.ok;
+        return data.ok;
+      }
+      if (i === 1) {
+        const data = await api("/api/setup/validate", {
+          method: "POST",
+          body: JSON.stringify({
+            fields: ["wsUrl", "httpUrl"],
+            wsUrl: state.wsUrl,
+            httpUrl: state.httpUrl,
+          }),
+        });
+        for (const [k, v] of Object.entries(data.results || {})) setErr(k, v.ok ? "" : v.detail);
+        // allow continue even if gateway offline, but mark not ready
+        state.ready[1] = !!data.ok;
+        return true;
+      }
+      if (i === 2) {
+        const data = await api("/api/setup/validate", {
+          method: "POST",
+          body: JSON.stringify({ fields: ["baseUrl"], baseUrl: state.baseUrl }),
+        });
+        for (const [k, v] of Object.entries(data.results || {})) setErr(k, v.ok ? "" : v.detail);
+        state.ready[2] = !!data.ok;
+        return true;
+      }
+      if (i === 3) {
+        const data = await api("/api/setup/validate", {
+          method: "POST",
+          body: JSON.stringify({
+            fields: ["workspaceRoot"],
+            workspaceRoot: state.workspaceRoot,
+          }),
+        });
+        for (const [k, v] of Object.entries(data.results || {})) setErr(k, v.ok ? "" : v.detail);
+        state.ready[3] = !!data.ok;
+        return data.ok;
+      }
+      return true;
+    }
+
+    async function testGateway() {
+      const msg = document.getElementById("connMsg");
+      msg.textContent = "测试中…";
+      try {
+        const data = await api("/api/setup/validate", {
+          method: "POST",
+          body: JSON.stringify({
+            fields: ["wsUrl", "httpUrl"],
+            wsUrl: state.wsUrl,
+            httpUrl: state.httpUrl,
+          }),
+        });
+        for (const [k, v] of Object.entries(data.results || {})) setErr(k, v.ok ? "" : v.detail);
+        msg.textContent = data.ok ? "连接正常" : "部分不可达，请检查 NapCat/OneBot";
+        msg.style.color = data.ok ? "var(--ok)" : "var(--warn)";
+        state.ready[1] = !!data.ok;
+        renderStepper();
+      } catch (e) {
+        msg.textContent = String(e.message || e);
+        msg.style.color = "var(--danger)";
+      }
+    }
+
+    async function checkWorkspace() {
+      const msg = document.getElementById("dirMsg");
+      msg.textContent = "检测中…";
+      try {
+        const data = await api("/api/setup/validate", {
+          method: "POST",
+          body: JSON.stringify({
+            fields: ["workspaceRoot"],
+            workspaceRoot: state.workspaceRoot,
+          }),
+        });
+        const r = data.results.workspaceRoot;
+        setErr("workspaceRoot", r && r.ok ? "" : (r && r.detail) || "失败");
+        msg.textContent = r && r.ok ? r.detail : "";
+        state.ready[3] = !!data.ok;
+        renderStepper();
+      } catch (e) {
+        setErr("workspaceRoot", String(e.message || e));
+      }
+    }
+
+    async function bootstrap(steps) {
+      const log = document.getElementById("bootLog");
+      if (log) log.textContent = "运行中…\n";
+      try {
+        const text = await api("/api/setup/bootstrap", {
+          method: "POST",
+          body: JSON.stringify({ steps }),
+        });
+        state.bootLog = text;
+        if (log) log.textContent = text;
+        const st = await api("/api/setup/state");
+        if (st.config?.dsh?.baseUrl) {
+          state.baseUrl = st.config.dsh.baseUrl;
+          const input = document.getElementById("baseUrl");
+          if (input) input.value = state.baseUrl;
+        }
+        if (steps.includes("discover")) {
+          const v = await api("/api/setup/validate", {
+            method: "POST",
+            body: JSON.stringify({ fields: ["baseUrl"], baseUrl: state.baseUrl }),
+          });
+          state.ready[2] = !!v.ok;
+          if (v.results?.baseUrl && !v.results.baseUrl.ok) {
+            setErr("baseUrl", v.results.baseUrl.detail);
+          } else {
+            setErr("baseUrl", "");
+          }
+          renderStepper();
+        }
+      } catch (e) {
+        if (log) log.textContent = String(e.message || e);
+      }
+    }
+
+    async function applyAll() {
+      setErr("apply", "");
+      const msg = document.getElementById("applyMsg");
+      msg.textContent = "写入中…";
+      try {
+        const data = await api("/api/setup/apply", {
+          method: "POST",
+          body: JSON.stringify({
+            selfId: state.selfId,
+            ownerQq: state.ownerQq,
+            ownerTitle: state.ownerTitle,
+            wsUrl: state.wsUrl,
+            httpUrl: state.httpUrl,
+            accessToken: state.accessToken === "••••" ? "" : state.accessToken,
+            baseUrl: state.baseUrl,
+            workspaceRoot: state.workspaceRoot,
+          }),
+        });
+        if (!data.ok) {
+          setErr("apply", data.error || "写入失败");
+          if (data.results) {
+            for (const [k, v] of Object.entries(data.results)) {
+              if (!v.ok) setErr(k, v.detail);
+            }
+          }
+          msg.textContent = "";
+          return;
+        }
+        state.lastDiff = data.diff || {};
+        state.lastBackup = data.backup;
+        msg.textContent = `已写入。备份：${data.backup || "—"}`;
+        state.ready[4] = true;
+        renderStepper();
+        const box = document.getElementById("diffBox");
+        if (box) {
+          box.innerHTML = Object.entries(state.lastDiff).map(([k, v]) =>
+            `<div><span class="k">${esc(k)}</span>: ${esc(JSON.stringify(v.from))} → ${esc(JSON.stringify(v.to))}</div>`
+          ).join("") || "<div>（无变更）</div>";
+        }
+        await bootstrap(["plugins", "discover"]);
+      } catch (e) {
+        setErr("apply", String(e.message || e));
+        msg.textContent = "";
+      }
+    }
+
+    document.getElementById("prevBtn").onclick = () => {
+      if (state.step > 0) {
+        state.step -= 1;
+        render();
+      }
+    };
+    document.getElementById("nextBtn").onclick = async () => {
+      try {
+        const ok = await validateStep(state.step);
+        if (!ok && state.step === 0) return;
+        if (!ok && state.step === 3) return;
+        if (state.step < 4) {
+          state.step += 1;
+          render();
+        }
+      } catch (e) {
+        setErr("step" + state.step, String(e.message || e));
+        const form = document.getElementById("form");
+        const err = document.createElement("div");
+        err.className = "err";
+        err.textContent = String(e.message || e);
+        form.appendChild(err);
+      }
+    };
+    document.getElementById("doneBtn").onclick = () => {
+      window.location.href = "/";
+    };
+
+    async function loadState() {
+      try {
+        const st = await api("/api/setup/state");
+        const c = st.config || {};
+        state.selfId = c.onebot?.selfId || "";
+        state.ownerQq = (c.access?.admins && c.access.admins[0]) || "";
+        state.ownerTitle = c.persona?.ownerTitle || "主人";
+        state.wsUrl = c.onebot?.wsUrl || state.wsUrl;
+        state.httpUrl = c.onebot?.httpUrl || state.httpUrl;
+        state.accessToken = c.onebot?.accessToken || "";
+        state.accessTokenSet = !!c.onebot?.accessTokenSet;
+        state.baseUrl = c.dsh?.baseUrl || "";
+        state.workspaceRoot = c.dsh?.workspaceRoot || "";
+        const pill = document.getElementById("bridgePill");
+        if (st.bridge?.running) {
+          pill.textContent = `bridge pid ${st.bridge.pid}`;
+          pill.classList.add("on");
+        } else {
+          pill.textContent = st.bridge?.hint || "bridge 未运行";
+          pill.classList.remove("on");
+        }
+        if (state.selfId && state.ownerQq) state.ready[0] = true;
+        if (state.baseUrl) state.ready[2] = true;
+        render();
+      } catch (e) {
+        render();
+        const form = document.getElementById("form");
+        const err = document.createElement("div");
+        err.className = "err";
+        err.textContent = "加载状态失败：" + (e.message || e) + "（请确认 token）";
+        form.prepend(err);
+      }
+    }
+
+    const saved = localStorage.getItem("ms-console-token");
+    if (saved) document.getElementById("token").value = saved;
+    document.getElementById("token").addEventListener("change", (e) => {
+      localStorage.setItem("ms-console-token", e.target.value || "");
+      loadState();
+    });
+    render();
+    loadState();
+  </script>
+</body>
+</html>

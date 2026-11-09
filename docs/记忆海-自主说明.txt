@@ -1,0 +1,83 @@
+记忆海 · L1+L2 自主操控（群更活 + 私聊找主人）
+==============================================
+
+她可以在「该不该动」上自己掂量，但只能走白名单动作；
+配额 / 静默时段 / 闭嘴 由代码硬限制，模型绕不过。
+
+开启
+----
+config.json → social.autonomy.enabled = true
+然后重启 bridge。
+
+开启后：经典「冷场探话」由自主 tick 接管（presence 只负责潜水状态），
+避免两套主动发言叠在一起。
+
+她能做的（L2 白名单）
+--------------------
+  noop            不合适时沉默
+  send_text       群或私聊说一句短话
+  send_sticker    发本地表情
+  send_voice      语音（需 tools.sendVoice=true 且 TTS 开；默认关）
+  schedule_nudge  给白名单用户记一条「小约定」提醒
+  draft_qzone     只写空间草稿并私聊通知管理员（不直发）
+
+私聊主动
+--------
+  allowPrivate=true 时，会轮流考虑「找主人私聊」
+  privateOwnerOnly=true → 只找 QQ 10001
+  minPrivateIdleMs=30min：你刚私聊过她，或她刚找过你，会再等一阵
+  你私聊她时会自动重置这个计时
+
+潜水群软唤醒
+------------
+  群进入 diving 后，若闲置 ≥ 2× minGroupIdleMs，仍可能冒一次泡
+
+她不能做的
+----------
+  踢人 / 改群名片 / 加好友 / 直接发空间 / 任意 OneBot 裸调
+
+节奏与配额（当前默认 / 高自主）
+------------------------------
+  tickMs              60000    约 1 分钟想一次
+  minGroupIdleMs      240000   群安静约 4 分钟才考虑
+  maxPerHour          6        每群每小时最多 6 次
+  maxPrivatePerHour   4
+  assertiveness       high     闲置够久时优先轻量在场，少 noop
+  quietStartHour/End  1–8      凌晨静默
+  每 tick 最多 1 个动作（群 / 私聊轮转）
+
+管理员命令
+----------
+  自主状态 / 自主
+  闭嘴 / 开口          全局熔断
+  群闭嘴 / 群开口      仅当前群
+
+示例配置
+--------
+  "autonomy": {
+    "enabled": true,
+    "tickMs": 60000,
+    "minGroupIdleMs": 240000,
+    "maxPerHour": 6,
+    "maxPrivatePerHour": 4,
+    "quietStartHour": 1,
+    "quietEndHour": 8,
+    "allowPrivate": true,
+    "privateOwnerOnly": true,
+    "minPrivateIdleMs": 1800000,
+    "assertiveness": "high",
+    "tools": {
+      "sendText": true,
+      "sendSticker": true,
+      "sendVoice": false,
+      "scheduleNudge": true,
+      "draftQzone": true
+    }
+  }
+
+调参建议
+--------
+  太吵：加大 minGroupIdleMs，或 maxPerHour 降到 1–2，assertiveness 改 normal/low，或「闭嘴」
+  太闷：略减 idle，看日志 [autonomy] decide 是否总 noop
+
+状态文件：data/state/autonomy.json（闭嘴、配额、私聊 idle）

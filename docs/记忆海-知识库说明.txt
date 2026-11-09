@@ -1,0 +1,57 @@
+记忆海 · 轻量知识库
+==================
+
+把产品手册、FAQ、笔记变成「可检索摘录」，聊天时自动塞进提示词。
+不做向量 Embedding，用与记忆海同款的关键词相关度（离线、零外部 API）。
+
+目录
+----
+  data/knowledge/
+    inbox/     ← 丢待入库的 .md / .txt / .pdf
+    docs/      ← 已入库原稿
+    index.json ← 切片索引（可「知识重载」重建）
+
+QQ 命令
+-------
+  知识库 / 知识帮助     状态 + 用法
+  知识列表               已入库文档
+  知识搜 申请加入        试检索（不进模型）
+  知识入库               扫描 inbox 全部入库（管理员）
+  知识入库 新人指南.md   指定文件（inbox / 绝对路径）
+  知识删 新人指南        删除（管理员）
+  知识重载               按 docs/ 重切索引（管理员）
+
+聊天注入
+--------
+  正常提问时，若命中分数 ≥ minScore，会附带：
+  【知识库摘录——仅作参考…】
+  · 《标题》#n：……
+  「你好」「嗯」等短招呼不检索。
+
+config.json → social.knowledge
+------------------------------
+  "knowledge": {
+    "enabled": true,
+    "dir": "data/knowledge",
+    "chunkChars": 450,
+    "chunkOverlap": 60,
+    "topK": 4,
+    "injectCharLimit": 900,
+    "minScore": 0.18,
+    "injectOnChat": true
+  }
+
+  skills.knowledge: true/false 总开关
+
+PDF 注意
+--------
+  需要可提取文字层。纯扫描图 PDF 请先 OCR 成 md/txt。
+  依赖 pdf-parse；解析失败时会尝试简易字节抽字。
+
+和记忆海的关系
+--------------
+  记忆海 = 跟人的长期关系碎片（会衰减）
+  知识库 = 稳定资料手册（不衰减、不训练模型）
+  两者可同时注入同一轮对话。
+
+改完配置请重启 bridge。

@@ -1,0 +1,30 @@
+{
+  "name": "@dsh-memory-sea/bridge",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "dsh-memory-sea-bridge": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node ./dist/index.js",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@dsh-memory-sea/memory-sea": "workspace:*",
+    "@dsh-memory-sea/persona": "workspace:*",
+    "@dsh-memory-sea/shared": "workspace:*",
+    "pdf-parse": "^2.4.5",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  }
+}
